@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Formations ministérielles (partagées)</title>
+    <style>
+        /* ===== CONSERVER VOTRE CSS EXISTANT (inchangé) ===== */
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif; }
+        body { background: #f0f4f8; margin: 0; padding: 20px 16px; color: #1e293b; }
+        .container { max-width: 1500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 { font-size: 1.9rem; background: linear-gradient(135deg, #0f3b5f, #1e6f5c); background-clip: text; -webkit-background-clip: text; color: transparent; margin: 0; }
+        .tabs { display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 2px solid #cbd5e1; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: none; font-weight: 600; padding: 8px 20px; border-radius: 40px; cursor: pointer; color: #475569; transition: 0.2s; }
+        .tab-btn.active { background: #1e6f5c; color: white; }
+        .panel { display: none; background: white; border-radius: 28px; padding: 24px 28px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .panel.active-panel { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 20px; margin-bottom: 28px; }
+        .field-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: 600; color: #0f3b5f; }
+        input, select, textarea { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 18px; font-size: 0.9rem; }
+        .radio-group { display: flex; gap: 20px; background: #f8fafc; padding: 8px 14px; border-radius: 32px; }
+        button { background: #1e6f5c; color: white; border: none; padding: 10px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-secondary { background: #475569; }
+        .btn-danger { background: #b91c1c; }
+        .action-bar { display: flex; gap: 16px; justify-content: flex-end; flex-wrap: wrap; }
+        .filters-bar { background: #f8fafc; padding: 16px 20px; border-radius: 28px; margin-bottom: 28px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+        .filter-item { flex: 1 1 180px; }
+        .filter-item.full { flex: 2 1 250px; }
+        .stat-cards { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
+        .card { background: #f1f5f9; border-radius: 28px; padding: 16px 20px; flex: 1 1 170px; text-align: center; }
+        .card .number { font-size: 2.3rem; font-weight: 800; color: #0f3b5f; }
+        .stats-table-container { overflow-x: auto; margin: 20px 0; border-radius: 20px; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #eef2ff; }
+        .badge { background: #e0f2fe; padding: 4px 10px; border-radius: 30px; font-size: 0.75rem; }
+        .clickable { cursor: pointer; color: #1e6f5c; font-weight: 600; text-decoration: underline; }
+        .text-analysis { background: #fefce8; border-radius: 24px; padding: 16px 20px; margin-top: 28px; border: 1px solid #fde047; }
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+        .tag { background: #e6f7f0; padding: 6px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 500; }
+        .tag-large { font-size: 1.1rem; background: #d1fae5; }
+        .mini-note { font-size: 0.7rem; color: #5b6e8c; margin-top: 8px; }
+        footer { text-align: center; margin-top: 40px; font-size: 0.7rem; }
+        .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 Observatoire des formations ministérielles</h1>
+        <p>Données partagées (Google Sheets) · Filtres croisés · Analyses thématiques</p>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="saisie">📝 Saisie</button>
+        <button class="tab-btn" data-tab="analyse">📈 Analyse & Filtres</button>
+        <button class="tab-btn" data-tab="basededonnees">🗄️ Base de données</button>
+    </div>
+
+    <!-- SAISIE -->
+    <div id="saisiePanel" class="panel active-panel">
+        <form id="formationForm">
+            <div class="form-grid">
+                <div class="field-group"><label>🏛️ Ministère *</label><input type="text" id="ministere" required></div>
+                <div class="field-group"><label>👤 Nom complet *</label><input type="text" id="nom" required></div>
+                <div class="field-group"><label>⚥ Sexe *</label><div class="radio-group"><label><input type="radio" name="sexe" value="Homme" required> Homme</label><label><input type="radio" name="sexe" value="Femme"> Femme</label><label><input type="radio" name="sexe" value="Autre"> Autre</label></div></div>
+                <div class="field-group"><label>✅ A été formé ? *</label><div class="radio-group"><label><input type="radio" name="forme" value="oui" required> Oui</label><label><input type="radio" name="forme" value="non"> Non</label></div></div>
+                <div class="field-group"><label>📅 Date formation *</label><input type="date" id="dateFormation" required></div>
+                <div class="field-group"><label>🎓 Thème *</label><input type="text" id="theme" placeholder="Ex: Leadership, Numérique" required></div>
+                <div class="field-group"><label>📌 Sous-thème</label><input type="text" id="sousTheme" placeholder="Optionnel"></div>
+                <div class="field-group full-width"><label>⚡ Défi à relever</label><textarea id="defi" rows="2" placeholder="Décrivez le défi post-formation..."></textarea></div>
+            </div>
+            <div class="action-bar">
+                <button type="submit" id="submitBtn">💾 Enregistrer</button>
+                <button type="button" id="resetFormBtn" class="btn-secondary">🔄 Réinitialiser</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ANALYSE (identique à votre version) -->
+    <div id="analysePanel" class="panel">
+        <div class="filters-bar">
+            <div class="filter-item"><label>🏛️ Ministère</label><select id="filterMinistere"><option value="TOUS">Tous</option></select></div>
+            <div class="filter-item"><label>⚥ Sexe</label><select id="filterSexe"><option value="TOUS">Tous</option><option value="Homme">Homme</option><option value="Femme">Femme</option><option value="Autre">Autre</option></select></div>
+            <div class="filter-item full"><label>🔍 Nom (recherche partielle)</label><input type="text" id="filterNom" placeholder="Ex: Dupont, Marie..."></div>
+            <button id="resetFiltersBtn" class="btn-secondary">🔄 Réinitialiser</button>
+        </div>
+        <div class="stat-cards">
+            <div class="card"><h3>👥 Personnes filtrées</h3><div class="number" id="totalFiltre">0</div></div>
+            <div class="card"><h3>✅ Taux formation</h3><div class="number" id="tauxFiltre">0%</div></div>
+            <div class="card"><h3>🏢 Ministères distincts</h3><div class="number" id="nbMinisteresFiltre">0</div></div>
+            <div class="card"><h3>⚥ H/F/A</h3><div class="number" id="sexeRatio" style="font-size:1.2rem;">0/0/0</div></div>
+        </div>
+        <h3>📅 Formations par mois et par ministère</h3>
+        <div class="stats-table-container"><table id="statsMoisMinistere"><thead><tr><th>Ministère</th><th>Mois/Année</th><th>Nb formations</th></tr></thead><tbody id="tbodyMoisMinistere"><tr><td colspan="3">Chargement...</td></tr></tbody></table></div>
+        <div class="mini-note">💡 Cliquez sur un ministère pour filtrer.</div>
+        <h3>📋 Détail par personne (selon filtres)</h3>
+        <div class="stats-table-container"><table id="detailFiltreTable"><thead><tr><th>Nom</th><th>Sexe</th><th>Ministère</th><th>Formé?</th><th>Date</th><th>Thème</th><th>Sous-thème</th><th>Défi</th></tr></thead><tbody id="detailFiltreTbody"><tr><td colspan="8">Aucune donnée</td></tr></tbody></table></div>
+        <div class="text-analysis"><h3>🔍 Analyse textuelle</h3><div style="display:flex;flex-wrap:wrap;gap:32px;"><div style="flex:1;"><h4>📖 Thèmes fréquents</h4><div id="themesCloud" class="tag-cloud">—</div></div><div style="flex:1;"><h4>⚡ Mots-clés des défis</h4><div id="defisCloud" class="tag-cloud">—</div></div></div></div>
+    </div>
+
+    <!-- BASE DE DONNÉES -->
+    <div id="basededonneesPanel" class="panel">
+        <h3>🗄️ Base complète</h3>
+        <div class="stats-table-container"><table id="detailTable"><thead><tr><th>Ministère</th><th>Nom</th><th>Sexe</th><th>Formé?</th><th>Date</th><th>Thème</th><th>Sous-thème</th><th>Défi</th></tr></thead><tbody id="detailTbody"><tr><td colspan="8">Aucune donnée</td></tr></tbody></table></div>
+        <div class="action-bar"><button id="exportDataBtn" class="btn-secondary">📎 Exporter JSON</button><button id="clearAllDataBtn" class="btn-danger">🗑️ Supprimer tout</button></div>
+    </div>
+    <footer>Données partagées en temps réel via Google Sheets (gratuit).</footer>
+</div>
+
+<script>
+    // ======================= CONFIGURATION =======================
+    const API_URL = "https://script.google.com/macros/s/AKfycbzLsj5kvCtjHbW3WiMsN3NdYl_gecNdPQaPk5SHr_CWsArvOHYq3FmqBvIhm3k6guPE/exec";
+    
+    let formations = [];
+    let isLoading = false;      // évite les chargements simultanés
+    let isSaving = false;       // évite les doubles soumissions
+
+    // ---------- Communication avec Google Sheets ----------
+    async function chargerDonnees() {
+        if (isLoading) return;
+        isLoading = true;
+        try {
+            const rep = await fetch(API_URL);
+            if (!rep.ok) throw new Error(`HTTP ${rep.status} - ${rep.statusText}`);
+            const data = await rep.json();
+            if (data && data.error) throw new Error(data.error);
+            formations = data.map(row => ({
+                id: row.id,
+                ministere: row.ministere,
+                nom: row.nom,
+                sexe: row.sexe,
+                forme: row.forme,
+                date: row.date,
+                theme: row.theme,
+                sousTheme: row.sousTheme,
+                defi: row.defi
+            }));
+            formations.forEach(f => { if(!f.sexe) f.sexe = "Non précisé"; });
+            updateMinistereSelect();
+            renderBaseDonnees();
+            applyFiltersAndRender();
+        } catch(err) {
+            console.error("Erreur chargement:", err);
+            alert("⚠️ Erreur de chargement des données : " + err.message);
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    async function ajouterFormation(record) {
+        if (isSaving) return false;
+        isSaving = true;
+        const submitBtn = document.getElementById("submitBtn");
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="loader"></span> Envoi...';
+        submitBtn.disabled = true;
+
+        try {
+            const params = new URLSearchParams({
+                action: "add",
+                ministere: record.ministere,
+                nom: record.nom,
+                sexe: record.sexe,
+                forme: record.forme,
+                date: record.date,
+                theme: record.theme,
+                sousTheme: record.sousTheme || "",
+                defi: record.defi || ""
+            });
+            const url = API_URL + "?" + params.toString();
+            const response = await fetch(url, { method: "POST" });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (result && result.success === true) {
+                await chargerDonnees();  // recharge les données mises à jour
+                return true;
+            } else {
+                throw new Error(result.error || "Le serveur a renvoyé une erreur inconnue");
+            }
+        } catch(err) {
+            console.error("Erreur ajout:", err);
+            alert("❌ Échec de l'enregistrement : " + err.message);
+            return false;
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            isSaving = false;
+        }
+    }
+
+    // === TOUTES LES AUTRES FONCTIONS (updateMinistereSelect, getFilteredData, etc.) SONT IDENTIQUES À VOTRE VERSION ===
+    // Je les recopie ici pour que le script soit complet.
+
+    function updateMinistereSelect() {
+        const set = new Set(formations.map(f => f.ministere?.trim()).filter(m => m));
+        const select = document.getElementById("filterMinistere");
+        if(!select) return;
+        const current = select.value;
+        select.innerHTML = '<option value="TOUS">Tous les ministères</option>';
+        Array.from(set).sort().forEach(m => { select.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`; });
+        if(current !== "TOUS" && set.has(current)) select.value = current;
+        else select.value = "TOUS";
+    }
+
+    function getFilteredData() {
+        const minVal = document.getElementById("filterMinistere")?.value || "TOUS";
+        const sexeVal = document.getElementById("filterSexe")?.value || "TOUS";
+        const nomSearch = document.getElementById("filterNom")?.value.trim().toLowerCase() || "";
+        return formations.filter(f => {
+            if(minVal !== "TOUS" && f.ministere?.trim() !== minVal) return false;
+            if(sexeVal !== "TOUS" && f.sexe !== sexeVal) return false;
+            if(nomSearch !== "" && (f.nom || "").toLowerCase().indexOf(nomSearch) === -1) return false;
+            return true;
+        });
+    }
+
+    function getMonthYear(dateStr) {
+        if(!dateStr) return "Date inconnue";
+        const parts = dateStr.split("-");
+        if(parts.length<2) return dateStr;
+        const mois = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
+        return `${mois[parseInt(parts[1])-1]} ${parts[0]}`;
+    }
+
+    function computeTextAnalytics(filtered) {
+        const themesCount = new Map();
+        const defisWordsCount = new Map();
+        for(let f of filtered) {
+            const theme = f.theme?.trim().toLowerCase();
+            if(theme) themesCount.set(theme, (themesCount.get(theme)||0)+1);
+            const defi = f.defi?.trim().toLowerCase();
+            if(defi && defi !== "") {
+                const words = defi.split(/[\s,.;:!?]+/).filter(w => w.length >= 3 && !["les","des","pour","dans","par","une","que","est","sont","avoir","être","faire","mais","avec","sans","cet","cette","ces","ses","son","sa","aux"].includes(w));
+                words.forEach(w => defisWordsCount.set(w, (defisWordsCount.get(w)||0)+1));
+            }
+        }
+        return { themes: Array.from(themesCount.entries()).sort((a,b)=>b[1]-a[1]).slice(0,8), defisMots: Array.from(defisWordsCount.entries()).sort((a,b)=>b[1]-a[1]).slice(0,10) };
+    }
+
+    function applyFiltersAndRender() {
+        const filtered = getFilteredData();
+        const total = filtered.length;
+        const formes = filtered.filter(f=>f.forme==="oui").length;
+        const taux = total===0?0:((formes/total)*100).toFixed(1);
+        const uniqMin = new Set(filtered.map(f=>f.ministere?.trim()).filter(m=>m)).size;
+        let h=0,fem=0,aut=0;
+        filtered.forEach(f=>{ if(f.sexe==="Homme") h++; else if(f.sexe==="Femme") fem++; else aut++; });
+        document.getElementById("totalFiltre").innerText = total;
+        document.getElementById("tauxFiltre").innerText = `${taux}%`;
+        document.getElementById("nbMinisteresFiltre").innerText = uniqMin;
+        document.getElementById("sexeRatio").innerHTML = `👨 ${h} / 👩 ${fem} / 🧬 ${aut}`;
+
+        const moisMinMap = new Map();
+        for(let f of filtered) {
+            const min = f.ministere?.trim() || "Non spécifié";
+            const mois = getMonthYear(f.date);
+            const key = `${min}|${mois}`;
+            moisMinMap.set(key, (moisMinMap.get(key)||0)+1);
+        }
+        let rows = [];
+        for(let [k, cnt] of moisMinMap.entries()) {
+            const [min, mois] = k.split("|");
+            rows.push({ ministere: min, mois, count: cnt });
+        }
+        rows.sort((a,b)=> a.ministere.localeCompare(b.ministere));
+        const tbodyMois = document.getElementById("tbodyMoisMinistere");
+        if(rows.length===0) tbodyMois.innerHTML = '<table><td colspan="3">Aucune donnée</td></tr>';
+        else {
+            tbodyMois.innerHTML = "";
+            rows.forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><span class="clickable" data-min="${escapeHtml(r.ministere)}">${escapeHtml(r.ministere)}</span></td><td>${escapeHtml(r.mois)}</td><td><span class="badge">${r.count} formation${r.count>1?'s':''}</span></td>`;
+                tbodyMois.appendChild(tr);
+            });
+            document.querySelectorAll("#tbodyMoisMinistere .clickable").forEach(el => {
+                el.addEventListener("click", () => {
+                    const minVal = el.getAttribute("data-min");
+                    if(minVal) { document.getElementById("filterMinistere").value = minVal; applyFiltersAndRender(); }
+                });
+            });
+        }
+
+        const tbodyDetail = document.getElementById("detailFiltreTbody");
+        if(filtered.length===0) tbodyDetail.innerHTML = '<tr><td colspan="8">Aucune personne</td></tr>';
+        else {
+            tbodyDetail.innerHTML = "";
+            filtered.forEach(p => {
+                const formeLabel = p.forme === "oui" ? "✅ Oui" : "❌ Non";
+                const defiCourt = p.defi && p.defi.trim() !== "" ? (p.defi.length > 60 ? p.defi.substring(0,60)+"…" : p.defi) : "—";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td><strong>${escapeHtml(p.nom||"")}</strong></td><td>${escapeHtml(p.sexe||"")}</td><td>${escapeHtml(p.ministere||"")}</td><td>${formeLabel}</td><td>${escapeHtml(p.date||"")}</td><td>${escapeHtml(p.theme||"")}</td><td>${escapeHtml(p.sousTheme||"—")}</td><td>${escapeHtml(defiCourt)}</td>`;
+                tbodyDetail.appendChild(tr);
+            });
+        }
+
+        const { themes, defisMots } = computeTextAnalytics(filtered);
+        const themesDiv = document.getElementById("themesCloud");
+        if(themes.length===0) themesDiv.innerHTML = "—";
+        else { themesDiv.innerHTML = ""; themes.forEach(([t,c]) => themesDiv.innerHTML += `<span class="tag ${c>2?'tag-large':''}">${escapeHtml(t)} (${c})</span>`); }
+        const defisDiv = document.getElementById("defisCloud");
+        if(defisMots.length===0) defisDiv.innerHTML = "—";
+        else { defisDiv.innerHTML = ""; defisMots.forEach(([w,c]) => defisDiv.innerHTML += `<span class="tag">${escapeHtml(w)} (${c})</span>`); }
+    }
+
+    function renderBaseDonnees() {
+        const tbody = document.getElementById("detailTbody");
+        if(formations.length===0) tbody.innerHTML = '<tr><td colspan="8">Aucune formation</td></tr>';
+        else {
+            tbody.innerHTML = "";
+            [...formations].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).forEach(f => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${escapeHtml(f.ministere||"")}</td><td>${escapeHtml(f.nom||"")}</td><td>${escapeHtml(f.sexe||"")}</td><td>${f.forme==="oui"?"✅ Oui":"❌ Non"}</td><td>${escapeHtml(f.date||"")}</td><td>${escapeHtml(f.theme||"")}</td><td>${escapeHtml(f.sousTheme||"—")}</td><td>${escapeHtml(f.defi||"—")}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    // --- Gestion formulaire ---
+    function getFormData() {
+        const ministere = document.getElementById("ministere").value.trim();
+        const nom = document.getElementById("nom").value.trim();
+        const sexeRadio = document.querySelector('input[name="sexe"]:checked');
+        const sexe = sexeRadio ? sexeRadio.value : null;
+        const formeRadio = document.querySelector('input[name="forme"]:checked');
+        const forme = formeRadio ? formeRadio.value : null;
+        const date = document.getElementById("dateFormation").value;
+        const theme = document.getElementById("theme").value.trim();
+        const sousTheme = document.getElementById("sousTheme").value.trim();
+        const defi = document.getElementById("defi").value.trim();
+        if(!ministere || !nom || !sexe || !forme || !date || !theme) { alert("Champs obligatoires manquants"); return null; }
+        return { ministere, nom, sexe, forme, date, theme, sousTheme, defi };
+    }
+    function resetForm() { document.getElementById("formationForm").reset(); setDefaultDate(); }
+    function setDefaultDate() { const today = new Date().toISOString().slice(0,10); if(document.getElementById("dateFormation") && !document.getElementById("dateFormation").value) document.getElementById("dateFormation").value = today; }
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const data = getFormData();
+        if(!data) return;
+        const success = await ajouterFormation(data);
+        if(success) {
+            resetForm();
+            alert("✅ Enregistrement réussi !");
+        } // sinon, l'alerte d'erreur est déjà affichée dans ajouterFormation
+    }
+
+    function exportJSON() {
+        const dataStr = JSON.stringify(formations, null, 2);
+        const blob = new Blob([dataStr], {type:"application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `export_formations_${new Date().toISOString().slice(0,19)}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    async function clearAll() {
+        if(!confirm("⚠️ Supprimer TOUTES les données ? Action irréversible.")) return;
+        alert("Cette fonction nécessite une action spéciale dans le script Google Sheets. Pour l'instant, supprimez manuellement les lignes dans votre feuille.");
+        // Vous pouvez implémenter une action "clear" dans Apps Script si besoin.
+    }
+
+    function initTabs() {
+        const btns = document.querySelectorAll(".tab-btn");
+        const panels = { saisie: document.getElementById("saisiePanel"), analyse: document.getElementById("analysePanel"), basededonnees: document.getElementById("basededonneesPanel") };
+        btns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const tab = btn.getAttribute("data-tab");
+                if(!panels[tab]) return;
+                btns.forEach(b=>b.classList.remove("active"));
+                btn.classList.add("active");
+                Object.values(panels).forEach(p=>p.classList.remove("active-panel"));
+                panels[tab].classList.add("active-panel");
+                if(tab === "analyse") applyFiltersAndRender();
+                if(tab === "basededonnees") renderBaseDonnees();
+            });
+        });
+    }
+
+    function bindEvents() {
+        document.getElementById("formationForm").addEventListener("submit", handleSubmit);
+        document.getElementById("resetFormBtn").addEventListener("click", resetForm);
+        document.getElementById("clearAllDataBtn").addEventListener("click", clearAll);
+        document.getElementById("exportDataBtn").addEventListener("click", exportJSON);
+        document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+            document.getElementById("filterMinistere").value = "TOUS";
+            document.getElementById("filterSexe").value = "TOUS";
+            document.getElementById("filterNom").value = "";
+            applyFiltersAndRender();
+        });
+        document.getElementById("filterMinistere")?.addEventListener("change", ()=>applyFiltersAndRender());
+        document.getElementById("filterSexe")?.addEventListener("change", ()=>applyFiltersAndRender());
+        document.getElementById("filterNom")?.addEventListener("input", ()=>applyFiltersAndRender());
+    }
+
+    function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+    function init() {
+        initTabs();
+        bindEvents();
+        setDefaultDate();
+        chargerDonnees();
+    }
+    window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
