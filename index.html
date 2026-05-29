@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Formations ministérielles · Dashboard Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        /* --- STYLES IDENTIQUES À L'ORIGINAL --- */
+        :root {
+            --primary: #6f42c1;
+            --primary-dark: #5a32a3;
+            --dark-bg: #1a1e2b;
+            --light-bg: #f0f4f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --shadow: 0 16px 35px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.12);
+            --radius: 20px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--light-bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: radial-gradient(ellipse at 10% 20%, rgba(111, 66, 193, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(111, 66, 193, 0.04) 0%, transparent 50%);
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .navbar {
+            background: var(--dark-bg);
+            background-image: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            padding: 0 16px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 8px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c084fc, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .navbar-brand i {
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 10px;
+            border-radius: 14px;
+            color: #c084fc;
+            transition: all 0.3s;
+            -webkit-text-fill-color: #c084fc;
+        }
+
+        .navbar-brand span {
+            display: none;
+        }
+
+        .navbar-menu {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.98);
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 4px;
+            z-index: 99;
+            backdrop-filter: blur(20px);
+            overflow-y: auto;
+            align-items: stretch;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-menu.open {
+            display: flex;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: transparent;
+            border: none;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+            width: 100%;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 52px;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .nav-item:active {
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(0.97);
+        }
+
+        .nav-item.active {
+            background: rgba(167, 139, 250, 0.25);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(167, 139, 250, 0.35);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+        }
+
+        .nav-item.active i {
+            transform: scale(1.1);
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .hamburger-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #e2e8f0;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hamburger-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.93);
+        }
+
+        .nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            top: 64px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 98;
+        }
+        .nav-overlay.open {
+            display: block;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 14px 40px;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .panel {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 22px 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid #e8ecf1;
+            animation: fadeSlide 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(111, 66, 193, 0.02) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .panel.active-panel {
+            display: block;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: -0.2px;
+        }
+
+        label i {
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 13px 15px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            background: #f8fafc;
+            transition: all 0.2s;
+            font-family: inherit;
+            letter-spacing: 0.1px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            min-height: 48px;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.1);
+            background: white;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: background 0.15s;
+            min-height: 38px;
+            font-size: 0.85rem;
+        }
+        .radio-group label:active {
+            background: rgba(111, 66, 193, 0.06);
+        }
+        .radio-group input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            min-height: auto;
+            accent-color: var(--primary);
+        }
+
+        button {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 14px rgba(111, 66, 193, 0.3);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 48px;
+            width: 100%;
+        }
+
+        button:active {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 10px 25px rgba(111, 66, 193, 0.4);
+            transform: scale(0.97);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: none;
+        }
+        .btn-secondary:active {
+            background: #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            border: 1px solid #ef4444;
+            color: white;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:active {
+            background: #dc2626;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .action-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .cancel-edit {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .filters-bar {
+            background: #f8fafc;
+            padding: 18px 14px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-item {
+            width: 100%;
+        }
+        .filter-item label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+        }
+        .filter-item input,
+        .filter-item select {
+            width: 100%;
+            min-height: 46px;
+        }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 18px 14px;
+            border: 1.5px solid #edf2f7;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), #a78bfa);
+            border-radius: 20px 0 0 20px;
+        }
+
+        .card:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-hover);
+            border-color: #d1d5db;
+        }
+
+        .card h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card h3 i {
+            font-size: 1rem;
+        }
+
+        .card .number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .card.blue h3 i {
+            color: #3b82f6;
+        }
+        .card.green h3 i {
+            color: #10b981;
+        }
+        .card.purple h3 i {
+            color: #8b5cf6;
+        }
+        .card.orange h3 i {
+            color: #f59e0b;
+        }
+        .card.pink h3 i {
+            color: #ec4899;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 16px;
+            border: 1.5px solid #e8ecf1;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .chart-card h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .chart-card h3 i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 280px;
+        }
+
+        .stats-table-container {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #334155;
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+
+        tr:active td {
+            background: #fafbfc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 10px;
+            transition: all 0.15s;
+            min-width: 38px;
+            min-height: 38px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .edit-btn {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+        .edit-btn:active {
+            background: #bfdbfe;
+            transform: scale(0.93);
+        }
+        .delete-btn {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+        .delete-btn:active {
+            background: #fecaca;
+            transform: scale(0.93);
+        }
+
+        .text-analysis {
+            background: #fffbeb;
+            border-radius: 20px;
+            padding: 20px 14px;
+            margin-top: 24px;
+            border: 1.5px solid #fcd34d;
+        }
+
+        .text-analysis h3 {
+            color: #92400e;
+            font-size: 0.95rem;
+        }
+        .text-analysis h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: #78350f;
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #d1fae5;
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #065f46;
+            transition: all 0.2s;
+        }
+        .tag:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tag-large {
+            font-size: 0.9rem;
+            background: #a7f3d0;
+            font-weight: 700;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            letter-spacing: 0.2px;
+            padding: 0 14px 20px;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.7s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .scroll-hint {
+            display: block;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            animation: pulseHint 2s infinite;
+        }
+        @keyframes pulseHint {
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Champ texte pour "Autre" thème */
+        .field-group-hidden {
+            display: none;
+        }
+        .field-group-visible {
+            display: flex;
+        }
+
+        @media (min-width: 768px) {
+            .navbar {
+                padding: 0 28px;
+                height: 72px;
+                gap: 12px;
+            }
+            .navbar-brand {
+                font-size: 1.3rem;
+                gap: 10px;
+            }
+            .navbar-brand i {
+                font-size: 1.6rem;
+                padding: 10px;
+                border-radius: 14px;
+            }
+            .navbar-brand span {
+                display: inline;
+            }
+
+            .hamburger-btn {
+                display: none;
+            }
+            .nav-overlay {
+                display: none !important;
+            }
+
+            .navbar-menu {
+                display: flex;
+                position: static;
+                flex-direction: row;
+                background: rgba(255, 255, 255, 0.04);
+                padding: 5px;
+                border-radius: 16px;
+                gap: 2px;
+                width: auto;
+                border-top: none;
+                backdrop-filter: none;
+                align-items: center;
+            }
+            .nav-item {
+                padding: 10px 18px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                width: auto;
+                min-height: auto;
+            }
+            .nav-item:active {
+                transform: none;
+            }
+            .nav-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: #e2e8f0;
+            }
+
+            .user-badge {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+
+            .main-content {
+                padding: 28px 32px 48px;
+            }
+            .panel {
+                border-radius: 26px;
+                padding: 32px 28px;
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 22px;
+            }
+            .field-group.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .action-bar {
+                flex-direction: row;
+                gap: 14px;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+            }
+            button {
+                width: auto;
+                min-height: 46px;
+            }
+
+            .filters-bar {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 16px;
+                padding: 20px;
+            }
+            .filter-item {
+                flex: 1 1 160px;
+                width: auto;
+            }
+            .filter-item.full {
+                flex: 2 1 200px;
+            }
+            .filters-bar button {
+                width: auto;
+                flex-shrink: 0;
+            }
+
+            .stat-cards {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 16px;
+            }
+            .card {
+                padding: 22px 18px;
+                border-radius: 22px;
+            }
+            .card .number {
+                font-size: 2rem;
+            }
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-hover);
+                border-color: #d1d5db;
+            }
+            .card:active {
+                transform: translateY(-2px);
+            }
+
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+
+            table {
+                min-width: auto;
+                font-size: 0.82rem;
+            }
+            th {
+                padding: 14px 16px;
+            }
+            td {
+                padding: 12px 16px;
+            }
+            tr:hover td {
+                background: #fafbfc;
+            }
+            .scroll-hint {
+                display: none;
+            }
+
+            .text-analysis {
+                padding: 24px;
+                border-radius: 22px;
+            }
+            button:active {
+                transform: scale(0.98);
+            }
+            button:hover:not(:disabled) {
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                box-shadow: 0 10px 25px rgba(111, 66, 193, 0.4);
+                transform: translateY(-2px);
+            }
+            .btn-secondary:hover:not(:disabled) {
+                background: #e2e8f0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                transform: translateY(-1px);
+            }
+            .btn-danger:hover:not(:disabled) {
+                background: #dc2626;
+                box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+                transform: translateY(-1px);
+            }
+            .radio-group label:hover {
+                background: rgba(111, 66, 193, 0.04);
+            }
+            .edit-btn:hover {
+                background: #bfdbfe;
+                transform: scale(1.05);
+            }
+            .delete-btn:hover {
+                background: #fecaca;
+                transform: scale(1.05);
+            }
+            .tag:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .navbar {
+                padding: 0 36px;
+                height: 76px;
+            }
+            .navbar-brand {
+                font-size: 1.5rem;
+                gap: 14px;
+            }
+            .navbar-brand i {
+                font-size: 1.9rem;
+                padding: 12px;
+                border-radius: 16px;
+            }
+            .navbar-menu {
+                padding: 6px;
+                border-radius: 18px;
+            }
+            .nav-item {
+                padding: 11px 24px;
+                border-radius: 14px;
+                font-size: 0.95rem;
+            }
+            .user-badge {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .main-content {
+                padding: 36px 40px;
+            }
+            .panel {
+                border-radius: 28px;
+                padding: 36px;
+            }
+            .form-grid {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 28px;
+            }
+            .card {
+                border-radius: 24px;
+                padding: 28px 24px;
+            }
+            .card .number {
+                font-size: 2.5rem;
+            }
+            .chart-wrapper {
+                height: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-graduation-cap"></i> <span>SUIVI DES FORMATIONS</span>
+        </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="navbar-menu" id="navbarMenu">
+            <button class="nav-item active" data-tab="saisie">
+                <i class="fas fa-pen-fancy"></i> Saisie rapide
+            </button>
+            <button class="nav-item" data-tab="analyse">
+                <i class="fas fa-chart-pie"></i> Analyse avancée
+            </button>
+            <button class="nav-item" data-tab="basededonnees">
+                <i class="fas fa-layer-group"></i> Base de données
+            </button>
+        </div>
+        <div class="user-badge">
+            <i class="fas fa-user-shield"></i> Admin
+        </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <div class="main-content">
+        <div id="saisiePanel" class="panel active-panel">
+            <div class="page-subtitle">Formulaire d'enregistrement des formations</div>
+            <form id="formationForm">
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label><i class="fas fa-building"></i> Ministère *</label>
+                        <select id="ministere" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="CELIBATAIRES">CELIBATAIRES</option>
+                            <option value="MARIES">MARIES</option>
+                            <option value="ETUDIANTS">ETUDIANTS</option>
+                            <option value="SOEURS">SOEURS</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="fas fa-id-card"></i> Nom complet *</label>
+                        <select id="nom" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="GBA Edy Marius">GBA Edy Marius</option>
+                            <option value="KONAN Vonin Felix">KONAN Vonin Felix</option>
+                            <option value="LAGO Steven">LAGO Steven</option>
+                            <option value="AKAGNY Antoine">AKAGNY Antoine</option>
+                            <option value="SEMUN N'de">SEMUN N'de</option>
+                            <option value="GNADJI Kla Eugène">GNADJI Kla Eugène</option>
+                            <option value="KONAN Joseph">KONAN Joseph</option>
+                            <option value="SAORE Emmanuel">SAORE Emmanuel</option>
+                            <option value="SAORE Henriette">SAORE Henriette</option>
+                            <option value="GOUE BI Marius">GOUE BI Marius</option>
+                            <option value="TO Guy Mathias">TO Guy Mathias</option>
+                            <option value="GNADJI Sandrine Née Yavo">GNADJI Sandrine Née Yavo</option>
+                            <option value="KONAN Chimène">KONAN Chimène</option>
+                            <option value="Camara Victoire Mafitini">Camara Victoire Mafitini</option>
+                            <option value="Lohouri Tatiana, epse TO">Lohouri Tatiana, epse TO</option>
+                            <option value="KESSE Sahi Ange Patrick">KESSE Sahi Ange Patrick</option>
+                            <option value="Sahi">Sahi</option>
+                            <option value="Konan Boris">Konan Boris</option>
+                            <option value="Doua Desiré">Doua Desiré</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="fas fa-venus-mars"></i> Sexe *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="sexe" value="Homme" required> 👨 Homme</label>
+                            <label><input type="radio" name="sexe" value="Femme"> 👩 Femme</label>
+                            <label><input type="radio" name="sexe" value="Autre"> 🧬 Autre</label>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="fas fa-check-double"></i> Formé ? *</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="forme" value="oui" required> ✅ Oui</label>
+                            <label><input type="radio" name="forme" value="non"> ❌ Non</label>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="far fa-calendar-check"></i> Date *</label>
+                        <input type="date" id="dateFormation" required>
+                    </div>
+                    <div class="field-group">
+                        <label><i class="fas fa-book-open"></i> Thème *</label>
+                        <select id="themeSelect" required>
+                            <option value="">-- Sélectionner un thème --</option>
+                            <option value="Prospérité Spirituelle">Prospérité Spirituelle</option>
+                            <option value="Prospérité dans l’Evangélisation et le gain des âmes">Prospérité dans l’Evangélisation et le gain des âmes</option>
+                            <option value="Prospérité Psycho-émotionnelle">Prospérité Psycho-émotionnelle</option>
+                            <option value="Prospérité Intellectuelle">Prospérité Intellectuelle</option>
+                            <option value="Prospérité Sociale et relationnelle">Prospérité Sociale et relationnelle</option>
+                            <option value="Prospérité Professionnelle, Scolaire et Universitaire">Prospérité Professionnelle, Scolaire et Universitaire</option>
+                            <option value="Prospérité dans la Gestion de son temps">Prospérité dans la Gestion de son temps</option>
+                            <option value="Prospérité Physique">Prospérité Physique</option>
+                            <option value="Prospérité Matérielle">Prospérité Matérielle</option>
+                            <option value="Prospérité financière">Prospérité financière</option>
+                            <option value="Autre">Autre (précisez)</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="autreThemeGroup" style="display: none;">
+                        <label><i class="fas fa-pen"></i> Précisez le thème</label>
+                        <input type="text" id="autreTheme" placeholder="Saisissez le thème personnalisé">
+                    </div>
+                    <div class="field-group">
+                        <label><i class="fas fa-tags"></i> Sous-thème</label>
+                        <input type="text" id="sousTheme" placeholder="Optionnel">
+                    </div>
+                    <div class="field-group full-width">
+                        <label><i class="fas fa-bolt"></i> Défi à relever</label>
+                        <textarea id="defi" rows="2" placeholder="Décrivez le défi post-formation..."></textarea>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button type="submit" id="submitBtn"><i class="fas fa-cloud-upload-alt"></i> Enregistrer</button>
+                    <button type="button" id="resetFormBtn" class="btn-secondary"><i class="fas fa-sync-alt"></i> Réinitialiser</button>
+                    <button type="button" id="cancelEditBtn" class="btn-secondary cancel-edit" style="display:none;"><i class="fas fa-times-circle"></i> Annuler modification</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="analysePanel" class="panel">
+            <div class="page-subtitle">TABLEAU DE BORD</div>
+            <div class="filters-bar">
+                <div class="filter-item"><label><i class="fas fa-filter"></i> Ministère</label><select id="filterMinistere"><option value="TOUS">Tous</option></select></div>
+                <div class="filter-item"><label><i class="fas fa-venus-mars"></i> Sexe</label><select id="filterSexe"><option value="TOUS">Tous</option><option value="Homme">Homme</option><option value="Femme">Femme</option><option value="Autre">Autre</option></select></div>
+                <div class="filter-item full"><label><i class="fas fa-search"></i> Nom</label><input type="text" id="filterNom" placeholder="Recherche partielle..."></div>
+                <div class="filter-item"><label><i class="far fa-calendar-alt"></i> Mois/Année</label><input type="month" id="filterMonth"></div>
+                <button id="resetFiltersBtn" class="btn-secondary"><i class="fas fa-undo-alt"></i> Réinitialiser</button>
+            </div>
+
+            <div class="stat-cards">
+                <div class="card blue">
+                    <h3><i class="fas fa-users"></i> Personnes</h3>
+                    <div class="number" id="totalFiltre">0</div>
+                </div>
+                <div class="card green">
+                    <h3><i class="fas fa-check-circle"></i> Taux form.</h3>
+                    <div class="number" id="tauxFiltre">0%</div>
+                </div>
+                <div class="card purple">
+                    <h3><i class="fas fa-user-graduate"></i> Formés</h3>
+                    <div class="number" id="nbFormesFiltre">0</div>
+                </div>
+                <div class="card orange">
+                    <h3><i class="fas fa-male"></i> Hommes formés</h3>
+                    <div class="number" id="nbHommesFiltre">0</div>
+                </div>
+                <div class="card pink">
+                    <h3><i class="fas fa-female"></i> Femmes formées</h3>
+                    <div class="number" id="nbFemmesFiltre">0</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-bar"></i> Nombre de personnes formées par ministère</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="barChartMinistere"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-pie"></i> Répartition des formés par sexe</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="pieChartSexe"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-analysis">
+                <h3 style="margin-bottom:16px;"><i class="fas fa-chart-line"></i> Analyse textuelle intelligente</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:20px;">
+                    <div style="flex:1;min-width:200px;"><h4>📖 Thèmes dominants</h4><div id="themesCloud" class="tag-cloud">—</div></div>
+                    <div style="flex:1;min-width:200px;"><h4>⚡ Mots-clés des défis</h4><div id="defisCloud" class="tag-cloud">—</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="basededonneesPanel" class="panel">
+            <div class="page-subtitle">BASE DE DONNEES</div>
+            <div class="stats-table-container">
+                <table id="detailTable">
+                    <thead><tr><th>Ministère</th><th>Nom</th><th>Sexe</th><th>Formé?</th><th>Date</th><th>Thème</th><th>Sous-thème</th><th>Défi</th><th>Actions</th></tr></thead>
+                    <tbody id="detailTbody"><tr><td colspan="9" style="text-align:center; padding:24px; color:#94a3b8;">Aucune donnée chargée</td></tr>
+                </tbody>
+                </table>
+            </div>
+            <span class="scroll-hint">← Glissez horizontalement pour voir toutes les colonnes →</span>
+            <div class="action-bar" style="margin-top:16px;">
+                <button id="exportDataBtn" class="btn-secondary"><i class="fas fa-download"></i> Exporter JSON</button>
+                <button id="clearAllDataBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> Tout supprimer</button>
+            </div>
+        </div>
+
+        <footer>🔄 Synchronisation Google Sheets · Interface premium · Mise à jour en temps réel</footer>
+    </div>
+
+    <script>
+        const API_URL =
+            "https://script.google.com/macros/s/AKfycbw6m0mBMeSV-hUwKSmbfWLGwCkCM0ANrEHCV9FJfMsu8-NQZJCiHtf3z3L_x9xczNko/exec";
+
+        let formations = [];
+        let isLoading = false;
+        let isSaving = false;
+        let barChartInstance = null;
+        let pieChartInstance = null;
+
+        // Gestion du champ "Autre" pour le thème
+        const themeSelect = document.getElementById("themeSelect");
+        const autreThemeGroup = document.getElementById("autreThemeGroup");
+        const autreThemeInput = document.getElementById("autreTheme");
+
+        function toggleAutreTheme() {
+            if (themeSelect.value === "Autre") {
+                autreThemeGroup.style.display = "flex";
+                autreThemeInput.required = true;
+            } else {
+                autreThemeGroup.style.display = "none";
+                autreThemeInput.required = false;
+                autreThemeInput.value = "";
+            }
+        }
+        themeSelect.addEventListener("change", toggleAutreTheme);
+
+        // Fonction pour obtenir la valeur réelle du thème
+        function getThemeValue() {
+            if (themeSelect.value === "Autre") {
+                return autreThemeInput.value.trim() || "";
+            }
+            return themeSelect.value;
+        }
+
+        // Fonction pour définir le thème dans le formulaire (édition)
+        function setThemeValue(themeStr) {
+            const predefined = Array.from(themeSelect.options).some(opt => opt.value === themeStr);
+            if (predefined && themeStr !== "Autre") {
+                themeSelect.value = themeStr;
+                autreThemeGroup.style.display = "none";
+                autreThemeInput.value = "";
+                autreThemeInput.required = false;
+            } else {
+                themeSelect.value = "Autre";
+                autreThemeGroup.style.display = "flex";
+                autreThemeInput.value = themeStr;
+                autreThemeInput.required = true;
+            }
+        }
+
+        async function chargerDonnees() {
+            if (isLoading) return;
+            isLoading = true;
+            try {
+                const rep = await fetch(API_URL);
+                if (!rep.ok) throw new Error(`HTTP ${rep.status}`);
+                const data = await rep.json();
+                if (data?.error) throw new Error(data.error);
+                formations = data.map(row => ({
+                    id: row.id,
+                    ministere: row.ministere,
+                    nom: row.nom,
+                    sexe: row.sexe,
+                    forme: row.forme,
+                    date: row.date,
+                    theme: row.theme,
+                    sousTheme: row.sousTheme,
+                    defi: row.defi
+                }));
+                formations.forEach(f => {
+                    if (!f.sexe) f.sexe = "Non précisé";
+                    if (f.date && typeof f.date === "object") {
+                        try { f.date = f.date.toISOString().slice(0, 10); } catch (e) { f.date = ""; }
+                    }
+                });
+                updateMinistereSelect();
+                renderBaseDonnees();
+                applyFiltersAndRender();
+            } catch (err) {
+                console.error(err);
+                alert("⚠️ Erreur de chargement: " + err.message);
+            } finally { isLoading = false; }
+        }
+
+        async function ajouterFormation(record) {
+            if (isSaving) return false;
+            isSaving = true;
+            const btn = document.getElementById("submitBtn");
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span> Envoi...';
+            btn.disabled = true;
+            try {
+                const params = new URLSearchParams({ action: "add", ...record, sousTheme: record.sousTheme || "", defi: record.defi || "" });
+                const res = await fetch(API_URL + "?" + params.toString(), { method: "POST" });
+                const result = await res.json();
+                if (result?.success) { await chargerDonnees(); return true; } else throw new Error(result.error || "Erreur");
+            } catch (err) { alert("❌ " + err.message); return false; } finally { btn.innerHTML = orig; btn.disabled = false; isSaving = false; }
+        }
+
+        async function supprimerFormation(id) {
+            if (!confirm("Supprimer cette formation ?")) return;
+            try {
+                const params = new URLSearchParams({ action: "delete", id });
+                const res = await fetch(API_URL + "?" + params.toString(), { method: "POST" });
+                const result = await res.json();
+                if (result.success) { await chargerDonnees(); alert("Formation supprimée."); }
+            } catch (err) { alert("❌ " + err.message); }
+        }
+
+        async function modifierFormation(record, id) {
+            if (isSaving) return;
+            isSaving = true;
+            const btn = document.getElementById("submitBtn");
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span> Mise à jour...';
+            btn.disabled = true;
+            try {
+                const params = new URLSearchParams({ action: "update", id, ...record, sousTheme: record.sousTheme || "", defi: record.defi || "" });
+                const res = await fetch(API_URL + "?" + params.toString(), { method: "POST" });
+                const result = await res.json();
+                if (result.success) { await chargerDonnees(); return true; } else throw new Error(result.error || "Erreur");
+            } catch (err) { alert("❌ " + err.message); return false; } finally { btn.innerHTML = orig; btn.disabled = false; isSaving = false; }
+        }
+
+        let currentEditId = null;
+
+        function remplirFormulaire(record) {
+            document.getElementById("ministere").value = record.ministere || "";
+            document.getElementById("nom").value = record.nom || "";
+            document.querySelectorAll('input[name="sexe"]').forEach(r => { if (r.value === record.sexe) r.checked = true; });
+            document.querySelectorAll('input[name="forme"]').forEach(r => { if (r.value === record.forme) r.checked = true; });
+            document.getElementById("dateFormation").value = (record.date && typeof record.date === "string") ? record.date : "";
+            setThemeValue(record.theme || "");
+            document.getElementById("sousTheme").value = record.sousTheme || "";
+            document.getElementById("defi").value = record.defi || "";
+            currentEditId = record.id;
+            document.getElementById("submitBtn").innerHTML = '<i class="fas fa-pen"></i> Mettre à jour';
+            document.getElementById("cancelEditBtn").style.display = "inline-flex";
+            document.getElementById("saisiePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function annulerEdition() {
+            document.getElementById("formationForm").reset();
+            setDefaultDate();
+            themeSelect.value = "";
+            autreThemeGroup.style.display = "none";
+            autreThemeInput.value = "";
+            currentEditId = null;
+            document.getElementById("submitBtn").innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Enregistrer';
+            document.getElementById("cancelEditBtn").style.display = "none";
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            // Validation du thème personnalisé
+            if (themeSelect.value === "Autre" && (!autreThemeInput.value.trim())) {
+                alert("Veuillez préciser le thème personnalisé.");
+                autreThemeInput.focus();
+                return;
+            }
+            const data = getFormData();
+            if (!data) return;
+            let success = false;
+            if (currentEditId) success = await modifierFormation(data, currentEditId);
+            else success = await ajouterFormation(data);
+            if (success) { annulerEdition(); resetForm(); alert("✅ Opération réussie !"); }
+        }
+
+        function getFormData() {
+            const ministere = document.getElementById("ministere").value.trim();
+            const nom = document.getElementById("nom").value.trim();
+            const sexe = document.querySelector('input[name="sexe"]:checked')?.value;
+            const forme = document.querySelector('input[name="forme"]:checked')?.value;
+            const date = document.getElementById("dateFormation").value;
+            let theme = getThemeValue();
+            if (!theme) {
+                alert("Veuillez sélectionner ou saisir un thème.");
+                return null;
+            }
+            if (!ministere || !nom || !sexe || !forme || !date) {
+                alert("Veuillez remplir tous les champs obligatoires.");
+                return null;
+            }
+            return { ministere, nom, sexe, forme, date, theme, sousTheme: document.getElementById("sousTheme").value.trim(), defi: document.getElementById("defi").value.trim() };
+        }
+
+        function resetForm() { document.getElementById("formationForm").reset(); setDefaultDate(); themeSelect.value = ""; autreThemeGroup.style.display = "none"; autreThemeInput.value = ""; }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().slice(0, 10);
+            const inp = document.getElementById("dateFormation");
+            if (inp && !inp.value) inp.value = today;
+        }
+
+        function getFilteredData() {
+            let filtered = [...formations];
+            const min = document.getElementById("filterMinistere")?.value || "TOUS";
+            const sex = document.getElementById("filterSexe")?.value || "TOUS";
+            const nomSearch = document.getElementById("filterNom")?.value.trim().toLowerCase() || "";
+            const month = document.getElementById("filterMonth")?.value;
+
+            if (min !== "TOUS") filtered = filtered.filter(f => f.ministere?.trim() === min);
+            if (sex !== "TOUS") filtered = filtered.filter(f => f.sexe === sex);
+            if (nomSearch) filtered = filtered.filter(f => (f.nom || "").toLowerCase().includes(nomSearch));
+            if (month) filtered = filtered.filter(f => (f.date || "").startsWith(month));
+
+            return filtered;
+        }
+
+        function renderBaseDonnees() {
+            const tbody = document.getElementById("detailTbody");
+            if (!formations.length) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#94a3b8;">Aucune donnée chargée</td></tr>';
+                return;
+            }
+            tbody.innerHTML = "";
+            [...formations].sort((a, b) => (b.date || "").localeCompare(a.date || "")).forEach(f => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${escapeHtml(f.ministere)}</td>
+                    <td>${escapeHtml(f.nom)}</td>
+                    <td>${escapeHtml(f.sexe)}</td>
+                    <td>${f.forme==="oui"?"✅":"❌"}</td>
+                    <td>${escapeHtml(f.date)}</td>
+                    <td>${escapeHtml(f.theme)}</td>
+                    <td>${escapeHtml(f.sousTheme||"—")}</td>
+                    <td style="max-width:180px;">${escapeHtml(f.defi||"—")}</td>
+                    <td class="action-buttons"><button class="edit-btn" data-id="${f.id}"><i class="fas fa-edit"></i></button><button class="delete-btn" data-id="${f.id}"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            attachActionEvents();
+        }
+
+        function renderCharts(filteredData) {
+            if (barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
+            if (pieChartInstance) { pieChartInstance.destroy(); pieChartInstance = null; }
+
+            const barCanvas = document.getElementById("barChartMinistere");
+            const pieCanvas = document.getElementById("pieChartSexe");
+            if (!barCanvas || !pieCanvas) return;
+
+            const ministeresUniques = [...new Set(filteredData.map(f => f.ministere?.trim()).filter(m => m))].sort();
+            const formesParMinistere = ministeresUniques.map(min => {
+                return filteredData.filter(f => f.ministere?.trim() === min && f.forme === "oui").length;
+            });
+
+            const barColors = [
+                'rgba(111, 66, 193, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)',
+                'rgba(245, 158, 11, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(99, 102, 241, 0.8)',
+                'rgba(14, 165, 233, 0.8)', 'rgba(168, 85, 247, 0.8)'
+            ];
+
+            const barCtx = barCanvas.getContext("2d");
+            barChartInstance = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ministeresUniques,
+                    datasets: [{
+                        label: 'Nombre de formés',
+                        data: formesParMinistere,
+                        backgroundColor: barColors.slice(0, ministeresUniques.length),
+                        borderColor: barColors.slice(0, ministeresUniques.length).map(c => c.replace('0.8', '1')),
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0, color: '#64748b', font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+                        x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45, minRotation: 0 }, grid: { display: false } }
+                    }
+                }
+            });
+
+            const formesFiltre = filteredData.filter(f => f.forme === "oui");
+            const hommesFormes = formesFiltre.filter(f => f.sexe === "Homme").length;
+            const femmesFormes = formesFiltre.filter(f => f.sexe === "Femme").length;
+            const autreFormes = formesFiltre.filter(f => f.sexe !== "Homme" && f.sexe !== "Femme").length;
+
+            const pieLabels = [], pieData = [], pieColors = ['rgba(59, 130, 246, 0.85)', 'rgba(236, 72, 153, 0.85)', 'rgba(148, 163, 184, 0.85)'];
+            if (hommesFormes > 0 || (hommesFormes === 0 && femmesFormes === 0 && autreFormes === 0)) { pieLabels.push('Hommes'); pieData.push(hommesFormes || 0); }
+            if (femmesFormes > 0) { pieLabels.push('Femmes'); pieData.push(femmesFormes); }
+            if (autreFormes > 0) { pieLabels.push('Autre'); pieData.push(autreFormes); }
+            if (pieData.length === 0 || pieData.reduce((a, b) => a + b, 0) === 0) { pieLabels.push('Aucun formé'); pieData.push(1); }
+
+            const pieCtx = pieCanvas.getContext("2d");
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: pieColors.slice(0, pieLabels.length),
+                        borderColor: ['#3b82f6', '#ec4899', '#94a3b8'].slice(0, pieLabels.length),
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyleWidth: 10, padding: 20, font: { size: 12, weight: '500' }, color: '#334155' } },
+                        tooltip: { callbacks: { label: (ctx) => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); const pct = total>0 ? ((ctx.parsed/total)*100).toFixed(1) : '0'; return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`; } } }
+                    }
+                }
+            });
+        }
+
+        function applyFiltersAndRender() {
+            const filtered = getFilteredData();
+            const total = filtered.length;
+            const formes = filtered.filter(f => f.forme === "oui").length;
+            const hommes = filtered.filter(f => f.sexe === "Homme" && f.forme === "oui").length;
+            const femmes = filtered.filter(f => f.sexe === "Femme" && f.forme === "oui").length;
+
+            document.getElementById("totalFiltre").innerText = total;
+            document.getElementById("tauxFiltre").innerText = total ? ((formes / total) * 100).toFixed(1) + "%" : "0%";
+            document.getElementById("nbFormesFiltre").innerText = formes;
+            document.getElementById("nbHommesFiltre").innerText = hommes;
+            document.getElementById("nbFemmesFiltre").innerText = femmes;
+
+            const { themes, defisMots } = computeTextAnalytics(filtered);
+            document.getElementById("themesCloud").innerHTML = themes.length ? themes.map(([t, c]) => `<span class="tag ${c>2?'tag-large':''}">${escapeHtml(t)} (${c})</span>`).join("") : "—";
+            document.getElementById("defisCloud").innerHTML = defisMots.length ? defisMots.map(([w, c]) => `<span class="tag">${escapeHtml(w)} (${c})</span>`).join("") : "—";
+
+            renderCharts(filtered);
+        }
+
+        function attachActionEvents() {
+            document.querySelectorAll('.edit-btn').forEach(b => {
+                b.onclick = (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    const rec = formations.find(f => f.id == id);
+                    if (rec) {
+                        remplirFormulaire(rec);
+                        document.querySelector('.nav-item[data-tab="saisie"]').click();
+                        closeMobileMenu();
+                    }
+                }
+            });
+            document.querySelectorAll('.delete-btn').forEach(b => {
+                b.onclick = (e) => supprimerFormation(e.currentTarget.dataset.id);
+            });
+        }
+
+        function updateMinistereSelect() {
+            const set = new Set(formations.map(f => f.ministere?.trim()).filter(m => m));
+            const select = document.getElementById("filterMinistere");
+            if (!select) return;
+            const current = select.value;
+            select.innerHTML = '<option value="TOUS">Tous</option>';
+            Array.from(set).sort().forEach(m => select.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`);
+            select.value = (current !== "TOUS" && set.has(current)) ? current : "TOUS";
+        }
+
+        function computeTextAnalytics(filtered) {
+            const themesCount = new Map(), defisWords = new Map();
+            filtered.forEach(f => {
+                if (f.theme) themesCount.set(f.theme.toLowerCase(), (themesCount.get(f.theme.toLowerCase()) || 0) + 1);
+                if (f.defi) f.defi.toLowerCase().split(/[\s,.;:!?]+/).filter(w => w.length > 2 && !["les","des","pour","dans","par","une","que","est","sur","avec"].includes(w)).forEach(w => defisWords.set(w, (defisWords.get(w) || 0) + 1));
+            });
+            return { themes: [...themesCount.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8), defisMots: [...defisWords.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10) };
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(formations, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `formations_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        }
+
+        function closeMobileMenu() {
+            document.getElementById("navbarMenu").classList.remove("open");
+            document.getElementById("navOverlay").classList.remove("open");
+        }
+
+        function openMobileMenu() {
+            document.getElementById("navbarMenu").classList.add("open");
+            document.getElementById("navOverlay").classList.add("open");
+        }
+
+        function initNavigation() {
+            const items = document.querySelectorAll(".nav-item");
+            const panels = {
+                saisie: document.getElementById("saisiePanel"),
+                analyse: document.getElementById("analysePanel"),
+                basededonnees: document.getElementById("basededonneesPanel")
+            };
+            items.forEach(item => item.addEventListener("click", () => {
+                const tab = item.dataset.tab;
+                items.forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+                Object.values(panels).forEach(p => p.classList.remove("active-panel"));
+                panels[tab].classList.add("active-panel");
+                if (tab === "analyse") {
+                    applyFiltersAndRender();
+                    setTimeout(() => { const filtered = getFilteredData(); renderCharts(filtered); }, 50);
+                }
+                if (tab === "basededonnees") renderBaseDonnees();
+                closeMobileMenu();
+                panels[tab].scrollIntoView({ behavior: "smooth", block: "start" });
+            }));
+
+            document.getElementById("hamburgerBtn").addEventListener("click", () => {
+                const menu = document.getElementById("navbarMenu");
+                menu.classList.contains("open") ? closeMobileMenu() : openMobileMenu();
+            });
+            document.getElementById("navOverlay").addEventListener("click", closeMobileMenu);
+            window.addEventListener("scroll", () => { if (document.getElementById("navbarMenu").classList.contains("open")) closeMobileMenu(); }, { passive: true });
+        }
+
+        function bindEvents() {
+            document.getElementById("formationForm").addEventListener("submit", handleSubmit);
+            document.getElementById("resetFormBtn").addEventListener("click", resetForm);
+            document.getElementById("cancelEditBtn").addEventListener("click", annulerEdition);
+            document.getElementById("clearAllDataBtn").addEventListener("click", () => {
+                if (confirm("Supprimer toutes les données ? Cette action est irréversible.")) {
+                    alert("Utilisez la suppression ligne par ligne via le bouton 🗑️ dans le tableau de la base de données.");
+                }
+            });
+            document.getElementById("exportDataBtn").addEventListener("click", exportJSON);
+            document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+                document.getElementById("filterMinistere").value = "TOUS";
+                document.getElementById("filterSexe").value = "TOUS";
+                document.getElementById("filterNom").value = "";
+                document.getElementById("filterMonth").value = "";
+                applyFiltersAndRender();
+            });
+            document.getElementById("filterMinistere")?.addEventListener("change", () => applyFiltersAndRender());
+            document.getElementById("filterSexe")?.addEventListener("change", () => applyFiltersAndRender());
+            document.getElementById("filterNom")?.addEventListener("input", () => applyFiltersAndRender());
+            document.getElementById("filterMonth")?.addEventListener("change", () => applyFiltersAndRender());
+        }
+
+        function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ""; }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            initNavigation();
+            bindEvents();
+            setDefaultDate();
+            chargerDonnees();
+        });
+    </script>
+</body>
+</html>
